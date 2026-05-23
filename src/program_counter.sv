@@ -3,7 +3,7 @@ module program_counter (
     input logic             clk, 
 
     // 1 running/paused/reset, 0 if not
-    input logic             running
+    input logic             running,
     input logic             pause,
     input logic             reset,
 
