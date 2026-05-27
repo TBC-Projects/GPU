@@ -1,16 +1,24 @@
-// This module takes a 4-bit input and produces a 16-bit one-hot output (decoder), 
-// where only the bit corresponding to the input value is set to 1, and all other bits are 0. 
-// The output is only active when the enable signal is high (ENABLED decoder).
+// Decoder: 4-to-16 one-hot decoder with enable.
+//
+// Converts a 4-bit binary address into a 16-bit one-hot output where only
+// the bit at position 'in' is set high. All other bits remain 0.
+// When 'enable' is low, all outputs are 0 (decoder is disabled).
+//
+// Used by RegFile to generate the write enable signal for each register:
+// only the register addressed by write_address gets its write enable asserted.
+// This mirrors the hardware reality — a decoder drives the clock enable or
+// load signal of exactly one register's flip-flop array.
+
 module Decoder (
-    input  logic [3:0]  in,
-    input  logic        enable,
-    output logic [15:0] out
+    input  logic [3:0]  in,      // 4-bit register address (selects 1 of 16)
+    input  logic        enable,  // when low, all outputs are 0
+    output logic [15:0] out      // one-hot: out[in]=1, all others=0
 );
 
     always_comb begin
-        out = 16'b0; // default: all outputs low (not enabled)
+        out = 16'b0; // default: all outputs low
         if (enable) begin
-            case(in)
+            case (in)
                 4'b0000: out = 16'b0000_0000_0000_0001;
                 4'b0001: out = 16'b0000_0000_0000_0010;
                 4'b0010: out = 16'b0000_0000_0000_0100;
@@ -27,8 +35,9 @@ module Decoder (
                 4'b1101: out = 16'b0010_0000_0000_0000;
                 4'b1110: out = 16'b0100_0000_0000_0000;
                 4'b1111: out = 16'b1000_0000_0000_0000;
-                default: out = 16'b0; // default case to handle invalid inputs
+                default: out = 16'b0;
             endcase
         end
     end
+
 endmodule
