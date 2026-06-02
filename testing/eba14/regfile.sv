@@ -83,3 +83,74 @@ module RegFile (
     endgenerate
 
 endmodule
+
+// Testbench for RegFile
+module RegFile_tb();
+    logic        clk;
+    logic        reset;
+    logic [3:0]  write_address;
+    logic [31:0] write_data;
+    logic        write_enable;
+    logic [3:0]  read_address_1;
+    logic [31:0] read_data_1;
+    logic [3:0]  read_address_2;
+    logic [31:0] read_data_2;
+
+    RegFile dut (
+        .clk(clk), .reset(reset),
+        .write_address(write_address), .write_data(write_data), .write_enable(write_enable),
+        .read_address_1(read_address_1), .read_data_1(read_data_1),
+        .read_address_2(read_address_2), .read_data_2(read_data_2)
+    );
+
+    initial clk = 0;
+    always #5 clk = ~clk;
+
+
+    // single write port, dual-read port test sequence
+    initial begin
+        // Case 1: Reset - both read ports return 0 (default state of registers)
+        reset = 1; write_enable = 0; @(posedge clk); 
+        #10;
+        reset = 0; read_address_1 = 4'd0; read_address_2 = 4'd15; 
+        #10;
+        assert(read_data_1 == 32'h0);
+        assert(read_data_2 == 32'h0);
+
+        // Case 2: Write to reg[0], read back on both ports
+        write_address = 4'd0; write_data = 32'hDEADBEEF; write_enable = 1'b1; @(posedge clk); 
+        #10; 
+        write_enable = 1'b0;
+        read_address_1 = 4'd0; read_address_2 = 4'd0; 
+        #10;
+        assert(read_data_1 == 32'hDEADBEEF);
+        assert(read_data_2 == 32'hDEADBEEF);
+
+        // Case 3: Write to reg[15], verify reg[0] is unaffected
+        write_address = 4'd15; write_data = 32'hCAFEFADE; write_enable = 1'b1; @(posedge clk); 
+        #10; 
+        write_enable = 1'b0;
+        read_address_1 = 4'd15; read_address_2 = 4'd0; 
+        #10;
+        assert(read_data_1 == 32'hCAFEFADE); // data in reg[15]
+        assert(read_data_2 == 32'hDEADBEEF); // data in reg[0] (which should remain unchanged)
+
+        // Case 4: Write disabled - data must not update despite the write attempt to reg[0]
+        write_address = 4'd0; write_data = 32'hFFFFFFFF; write_enable = 1'b0; @(posedge clk); 
+        #10;
+        read_address_1 = 4'd0; 
+        #10;
+        assert(read_data_1 == 32'hDEADBEEF);
+
+        // Case 5: Simultaneous dual-port read of two distinct registers
+        write_address = 4'd7; write_data = 32'hAAAA5555; write_enable = 1'b1; @(posedge clk); 
+        #10; 
+        write_enable = 1'b0;
+        read_address_1 = 4'd7; read_address_2 = 4'd15; 
+        #10;
+        assert(read_data_1 == 32'hAAAA5555);
+        assert(read_data_2 == 32'hCAFEFADE);
+
+        $finish;
+    end
+endmodule
