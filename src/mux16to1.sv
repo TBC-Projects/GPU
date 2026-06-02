@@ -9,3 +9,18 @@ module mux16to1 (
     assign out = in[sel];
 
 endmodule
+
+module mux16to1_testbench;
+    logic [15:0] in;
+    logic [3:0] sel;
+    logic out;
+    
+    mux16to1 dut(.in, .sel, .out);
+    
+    initial begin
+       in = 16'b0101010101010101; #10;
+        for (int i=0; i < 16, i++) begin
+            sel = i; #10;
+        end
+    end
+    endmodule 
