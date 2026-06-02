@@ -27,3 +27,57 @@ module Mux16to1 (
         endcase
     end
 endmodule
+
+// Testbench for Mux16to1
+module Mux16to1_tb ();
+
+    logic [15:0] in;
+    logic [3:0]  sel;
+    logic        out;
+
+    Mux16to1 dut (.in(in), .sel(sel), .out(out));
+
+    initial begin
+        // Case 1: All inputs 0 - output must be 0 for any select
+        in = 16'h0000;
+        sel = 4'd0;  #10; assert(out == 1'b0);
+        sel = 4'd7;  #10; assert(out == 1'b0);
+        sel = 4'd15; #10; assert(out == 1'b0);
+
+        // Case 2: All inputs 1 - output must be 1 for any select
+        in = 16'hFFFF;
+        sel = 4'd0;  #10; assert(out == 1'b1);
+        sel = 4'd15; #10; assert(out == 1'b1);
+
+        // Case 3: Only bit 0 set - sel=0 high, sel=1 low
+        in = 16'h0001;
+        sel = 4'd0; #10; assert(out == 1'b1);
+        sel = 4'd1; #10; assert(out == 1'b0);
+
+        // Case 4: Only bit 15 set - sel=15 high, sel=14 low
+        in = 16'h8000;
+        sel = 4'd15; #10; assert(out == 1'b1);
+        sel = 4'd14; #10; assert(out == 1'b0);
+
+        // Case 5: Alternating bits set - verifying correct output for each select
+        in = 16'hAAAA; // 1010_1010_1010_1010
+        sel = 4'd0;  #10; assert(out == 1'b0);
+        sel = 4'd1;  #10; assert(out == 1'b1);
+        sel = 4'd2;  #10; assert(out == 1'b0);
+        sel = 4'd3;  #10; assert(out == 1'b1);
+        sel = 4'd4;  #10; assert(out == 1'b0);
+        sel = 4'd5;  #10; assert(out == 1'b1);
+        sel = 4'd6;  #10; assert(out == 1'b0);
+        sel = 4'd7;  #10; assert(out == 1'b1);
+        sel = 4'd8;  #10; assert(out == 1'b0);
+        sel = 4'd9;  #10; assert(out == 1'b1);
+        sel = 4'd10; #10; assert(out == 1'b0);
+        sel = 4'd11; #10; assert(out == 1'b1);
+        sel = 4'd12; #10; assert(out == 1'b0);
+        sel = 4'd13; #10; assert(out == 1'b1);
+        sel = 4'd14; #10; assert(out == 1'b0);
+        sel = 4'd15; #10; assert(out == 1'b1);
+
+        $finish;
+    end
+endmodule
