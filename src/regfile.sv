@@ -43,3 +43,48 @@ module regfile (
     assign read_data_2 = register_storage[read_address_2];
 
 endmodule
+
+module regfile_testbench();
+    logic        clk;            // System clock
+    logic        reset;          // Synchronous (active-high) reset
+    logic [3:0]  write_address;  // 4-bit address to select the write register
+    logic [31:0] write_data;
+    logic        write_enable;
+    logic [3:0]  read_address_1;
+    logic [31:0] read_data_1;
+    logic [3:0]  read_address_2;
+    logic [31:0] read_data_2;
+
+    parameter ClockDelay = 5000;
+
+    regfile dut (.clk, .reset, .write_address, .write_data, .write_enable, .read_address_1. .read_data_1, .read_address_2, .read_data_2);
+
+    initial begin
+	    clk <=0;
+	    forever #(ClockDelay/2) clk <= ~clk;
+    end
+
+    initial begin 
+	// reset
+	@(posedge clk); reset <= 1'b1;
+	@(posedge clk); reset <= 1'b0;
+
+	// test writes
+	// first enable writes, then write a value to each register
+	write_enable <= 1'b1;
+	for (int i = 0; i < 16; i++) begin
+		@(posedge clk); write_address <= i; write_data <= i;
+	end
+	write_enable <= 1'b0;
+
+	// test reads
+	for (int i = 0; i < 16; i++) begin
+		read_address_1 <= i;
+		read_address_2 <= i;
+		@(posedge clk); 
+		$display("read1 reg %d contents: %d", i, read_data_1);
+		$display("read2 reg %d contents: %d", i, read_data_2);
+	end
+    end
+endmodule;
+

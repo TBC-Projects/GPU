@@ -84,3 +84,22 @@ module Thread (
     assign write_data = wb_sel ? mem_data_out : alu_result;
 
 endmodule
+
+module Thread_testbench();
+	logic clk;
+	logic reset;
+
+	Thread dut();
+	parameter clk_delay = 5000;
+
+	initial begin
+		clk <= 0;
+		forever clk <= (clk_delay/2) <= ~clk;
+	end
+
+	initial begin
+		reset <= 1'b1;
+		// 100 cycles from reset
+		for (int i = 0; i < 100; i++) @(posedge clk); 
+	end
+endmodule

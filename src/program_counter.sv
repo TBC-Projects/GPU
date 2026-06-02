@@ -31,3 +31,45 @@ module program_counter (
     end
 
 endmodule
+
+module program_counter_testbench();
+	logic clk;
+	logic running;
+	logic pause;
+	logic reset;
+	logic branch_taken;
+	logic [31:0] branch_data;
+	logic [31:0] pc;
+	parameter ClockDelay = 5000;
+
+	program_counter dut(.clk, .running, .reset, .pause, .branch_taken, .branch_data, .pc);
+	
+	initial begin
+		clk <= 0;
+		forever clk <= (ClockDelay/2) clk <= ~clk;
+	end
+	
+	initial begin
+		reset <= 1'b1;
+		@(posedge clk); 
+		reset <= 1'b0;
+		running <= 1'b1;
+		$display("Now testing: 16 cycles of nothing");
+		for (int i = 0; i < 16; i++) begin
+			@(posedge clk); $display("pc = %d", pc);
+		end
+		@(posedge clk);
+		$display("Now testing: 8 cycles paused");
+		pause <= 1'b1;
+		for (int i = 0; i < 8; i++) begin
+			@(posedge clk); $display("pc = %d", pc);
+		end
+		@(posedge clk);
+		$display("Now testing: branch taken");
+		$display("pc = %d", pc);
+		pause <= 1'b0;
+		branch_taken <= 1'b1;
+		branch_data <= 32'd0; // goto beginning
+		@(posedge clk); $display("pc = %d", pc);
+	end
+endmodule
