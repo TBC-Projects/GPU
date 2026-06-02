@@ -1,7 +1,7 @@
 module MultiplyDivide (
     input logic [31:0] A, B,
     input logic op,           // op=0 for Multiply, op=1 for Divide
-    output logic [63:0] result,
+    output logic [63:0] result
 );
 
     logic [63:0] product;

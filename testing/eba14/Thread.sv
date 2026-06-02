@@ -1,8 +1,12 @@
-// Each thread has an ALU, Register, Program counter, and memory load/store unit.
+// Each thread has an ALU, Register File, Program Counter, and memory load/store unit.
+// 'running' controls whether this thread's PC advances each cycle (set by the scheduler).
+// 'halt' goes high when the thread has finished executing and should no longer run.
 
 module Thread (
-    input logic clk,
-    input logic reset
+    input  logic clk,
+    input  logic reset,
+    input  logic running, // high when this thread is scheduled to execute this cycle
+    output logic halt     // high when this thread has completed (executed a HALT instruction)
 );
 
     // Register File:
@@ -15,7 +19,7 @@ module Thread (
     logic [31:0] read_data_2;
 
     // ALU:
-    logic [1:0]  alu_op;
+    logic [2:0]  alu_op; // 3-bit opcode: 000=ADD 001=SUB 010=MUL 011=DIV 100=AND 101=OR 110=XOR
     logic [31:0] alu_result;
     logic        overflow;
     logic        negative;
@@ -55,12 +59,16 @@ module Thread (
     program_counter pc_unit (
         .clk          (clk),
         .reset        (reset),
-        .running      (running),
+        .running      (running), // thread only advances PC when the scheduler selects it
         .pause        (pause),
         .branch_taken (branch_taken),
         .branch_target(branch_target),
         .pc           (pc)
     );
+
+    // halt is driven high when this thread executes a HALT instruction.
+    // Instruction decoding is not yet implemented in Thread -- placeholder for now.
+    assign halt = 1'b0;
 
     // Memory Load/Store:
     logic [3:0]  mem_address;
