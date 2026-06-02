@@ -30,3 +30,41 @@ module mem_load_store (
     end
 
 endmodule
+
+module mem_load_store_testbench();
+	logic clk;
+	logic reset;
+	logic [3:0] reg_address;
+	logic [31:0] reg_data_in, reg_data_out;
+	logic mem_write_enable;
+	logic mem_read_enable;
+
+	parameter clk_delay = 5000;
+
+	mem_load_store dut(.clk, .reset, .reg_address, .reg_data_in, .reg_data_out,
+			   .mem_write_enable, .mem_read_enable);
+	initial begin
+		clk <= 0;
+		forever clk <= (ClockDelay/2) clk <= ~clk;
+	end
+
+	initial begin
+		reset <= 1'b0;
+		@(posedge clk);
+		reg_data_in <= 31'hFFFFFFFF;
+		// write
+
+		mem_write_enable <= 1'b1;
+		for (int i = 0; i < 16; i++) begin // for each reg address
+			reg_address <= i; @(posedge clk);
+		end
+		mem_write_enable <= 1'b0;
+		// read
+
+		mem_read_enable <= 1'b1;
+		for (int i = 0; i < 16; i++) begin
+			reg_address <= i; @(posedge clk);
+		end
+	end
+endmodule
+
