@@ -19,7 +19,7 @@ module mux16to1_testbench;
 
     initial begin
        in = 16'b0101010101010101; #10;
-        for (i=0; i < 16, i++) begin
+        for (int i = 0; i < 16, i++) begin
             sel = i; #10;
         end
     end
