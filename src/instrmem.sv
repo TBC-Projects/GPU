@@ -37,4 +37,19 @@ module instruction_memory (
 		else
 			instruction = mem[address/4];
 	end
-endmodule 
+endmodule
+
+module instruction_memory_testbench;
+	logic [31:0] address,
+	logic [15:0] instruction,
+	logic clk,
+	
+	instruction_memory dut (
+		.address		(address),
+		.instruction	(instruction),
+		.clk 			(clk)
+	);
+		
+	
+endmodule
+	
